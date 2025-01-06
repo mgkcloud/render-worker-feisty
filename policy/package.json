@@ -1,0 +1,25 @@
+{
+  "name": "remotion-api",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "dependencies": {
+    "@cloudflare/wrangler": "*",
+    "@remotion/cli": "^4.0.244",
+    "@remotion/lambda": "*",
+    "@sentry/node": "*",
+    "@sentry/tracing": "*",
+    "itty-router": "*",
+    "react": "*",
+    "react-dom": "*",
+    "remotion": "*"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler publish",
+    "test": "jest"
+  },
+  "resolutions": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
