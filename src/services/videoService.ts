@@ -1,28 +1,4 @@
-interface VideoGenerationRequest {
-  siteName: string;
-  compositionId: string;
-  inputProps: any;
-  codec: string;
-}
-
-interface VideoGenerationResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-  };
-  errors?: string[];
-}
-
-interface ProgressResponse {
-  success: boolean;
-  data?: {
-    status: 'processing' | 'done';
-    url: string | null;
-    progress: number;
-  };
-  message?: string;
-}
+import type { VideoGenerationRequest, VideoGenerationResponse, ProgressResponse } from '../../api';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -30,14 +6,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export const videoService = {
   async generateVideo(videoProps: any): Promise<VideoGenerationResponse> {
     try {
-      const request: VideoGenerationRequest = {
-        siteName: 'tiktok-video',
+      const request: Omit<VideoGenerationRequest, 'siteName'> = {
         compositionId: 'TikTok',
         inputProps: videoProps,
         codec: 'h264'
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/function/video-generation/mix-video?api_key=${API_KEY}`, {
+      const response = await fetch(`${API_BASE_URL}/api/video-generation?api_key=${API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +38,7 @@ export const videoService = {
 
   async checkProgress(renderId: string): Promise<ProgressResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/function/video-generation/progress/${renderId}?api_key=${API_KEY}`);
+      const response = await fetch(`${API_BASE_URL}/api/video-generation/progress/${renderId}?api_key=${API_KEY}`);
       const data = await response.json();
 
       if (!response.ok) {

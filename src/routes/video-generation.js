@@ -1,142 +1,128 @@
-import { validateRequest } from '../validation'
-import { quotaManager } from '../quota'
-import { renderCache } from '../cache'
-import { invokeLambda } from '../lambda-client'
+import { RemotionVideoAPI } from '../../api';
+import { validateRequest } from '../validation';
+import { quotaManager } from '../quota';
+import { renderCache } from '../cache';
+
+const api = new RemotionVideoAPI({
+  mode: 'local',
+  serveUrl: 'http://localhost:3001',
+  outputDir: './rendered-videos'
+});
 
 export async function handleVideoGeneration(request) {
   try {
-    const apiKey = request.query.api_key
-    console.log('Starting video generation for API Key:', apiKey)
+    const apiKey = request.query.api_key;
+    console.log('Starting video generation for API Key:', apiKey);
     
-    const input = await request.json()
-    console.log('Request body:', JSON.stringify(input, null, 2))
+    const input = await request.json();
+    console.log('Request body:', JSON.stringify(input, null, 2));
 
     // Validate request
-    console.log('Validating request...')
-    const validationResult = validateRequest({ body: input })
+    console.log('Validating request...');
+    const validationResult = validateRequest({ body: input });
     if (!validationResult.valid) {
-      console.log('Validation failed:', validationResult.errors)
+      console.log('Validation failed:', validationResult.errors);
       return new Response(JSON.stringify({
         success: false,
         message: "Invalid request data",
         errors: validationResult.errors
-      }), { status: 400 })
+      }), { status: 400 });
     }
 
     // Check quota
-    console.log('Checking quota...')
+    console.log('Checking quota...');
     if (!quotaManager.checkQuota(apiKey)) {
-      console.log('Quota exceeded for API Key:', apiKey)
+      console.log('Quota exceeded for API Key:', apiKey);
       return new Response(JSON.stringify({
         success: false,
         message: "Monthly API quota exceeded"
-      }), { status: 429 })
+      }), { status: 429 });
     }
 
-    // Invoke Lambda
-    console.log('Invoking Remotion Lambda function...')
-    const lambdaResponse = await invokeLambda({
-      region: process.env.REMOTION_AWS_REGION,
-      functionName: process.env.REMOTION_AWS_LAMBDA_FUNCTION,
-      siteName: input.siteName, // Assuming siteName is passed in the request
-      compositionId: input.compositionId, // Assuming compositionId is passed in the request
-      inputProps: input.inputProps, // Assuming inputProps are passed in the request
-      codec: input.codec // Assuming codec is passed in the request
+    // Generate video using local renderer
+    console.log('Starting local video generation...');
+    const response = await api.generateVideo({
+      compositionId: input.compositionId,
+      inputProps: input.inputProps,
+      codec: input.codec
     });
-    console.log('Remotion Lambda invocation complete.');
-    const { renderId, bucketName } = lambdaResponse;
-    console.log('Remotion Lambda response:', { renderId, bucketName });
+
+    if (!response.success) {
+      throw new Error(response.message);
+    }
+
+    const renderId = response.data.id;
 
     // Store render info
-    console.log('Storing render info in cache...')
+    console.log('Storing render info in cache...');
     renderCache.set(renderId, {
       status: 'processing',
-      bucketName,
       apiKey,
       startTime: Date.now()
-    })
+    });
 
     // Consume quota
-    console.log('Consuming quota for API Key:', apiKey)
-    quotaManager.consumeQuota(apiKey)
+    console.log('Consuming quota for API Key:', apiKey);
+    quotaManager.consumeQuota(apiKey);
 
-    console.log('Video generation started successfully')
-    return new Response(JSON.stringify({
-      success: true,
-      message: "Video generation started",
-      data: {
-        id: renderId
-      }
-    }), { 
+    console.log('Video generation started successfully');
+    return new Response(JSON.stringify(response), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
-    })
+    });
 
   } catch (error) {
-    console.error('Video generation error:', error)
+    console.error('Video generation error:', error);
     return new Response(JSON.stringify({
       success: false,
-      message: "Internal server error"
-    }), { status: 500 })
+      message: error.message || "Internal server error"
+    }), { status: 500 });
   }
 }
 
 export async function handleProgressCheck(request) {
   try {
-    const { id } = request.params
-    const apiKey = request.query.api_key
-    console.log('Checking progress for render ID:', id, 'API Key:', apiKey)
+    const { id } = request.params;
+    const apiKey = request.query.api_key;
+    console.log('Checking progress for render ID:', id, 'API Key:', apiKey);
 
-    const render = renderCache.get(id)
+    const render = renderCache.get(id);
     if (!render) {
-      console.log('Render not found for ID:', id)
+      console.log('Render not found for ID:', id);
       return new Response(JSON.stringify({
         success: false,
         message: "Render not found"
-      }), { status: 404 })
+      }), { status: 404 });
     }
 
     if (render.apiKey !== apiKey) {
-      console.log('Unauthorized access attempt for render ID:', id)
+      console.log('Unauthorized access attempt for render ID:', id);
       return new Response(JSON.stringify({
         success: false,
         message: "Unauthorized"
-      }), { status: 403 })
+      }), { status: 403 });
     }
 
-    console.log('Fetching progress from Lambda...')
-    const progress = await invokeLambda({
-      method: 'GET',
-      url: `/progress/${id}`
-    })
-    console.log('Progress response:', progress)
+    console.log('Checking render progress...');
+    const progress = await api.checkProgress(id);
 
-    const response = {
-      success: true,
-      data: {
-        status: progress.done ? 'done' : 'processing',
-        url: progress.outputFile || null,
-        progress: progress.overallProgress
-      }
+    // Update cache if render is complete
+    if (progress.success && progress.data?.status === 'done') {
+      console.log('Render complete, removing from cache:', id);
+      renderCache.delete(id);
     }
 
-    // Update cache
-    if (progress.done) {
-      console.log('Render complete, removing from cache:', id)
-      renderCache.delete(id)
-    }
-
-    console.log('Returning progress response:', response)
-    return new Response(JSON.stringify(response), {
+    console.log('Returning progress response:', progress);
+    return new Response(JSON.stringify(progress), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
-    })
+    });
 
   } catch (error) {
-    console.error('Progress check error:', error)
+    console.error('Progress check error:', error);
     return new Response(JSON.stringify({
       success: false,
-      message: "Internal server error"
-    }), { status: 500 })
+      message: error.message || "Internal server error"
+    }), { status: 500 });
   }
 }

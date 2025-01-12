@@ -111,13 +111,13 @@ function TikTokComposition(props: InputProps): React.ReactElement {
                   muted={true}
                   style={{
                   position: 'absolute',
-                  width: width * 0.8,
-                  height: height * 0.6,
-                  left: width * 0.1,
-                  top: height * 0.2,
-                  borderRadius: 20,
+                  width: width * 1,
+                  height: height * 1,
+                  left: 0,
+                  top: 0,
+                  borderRadius: 0,
                   boxShadow: '0 0 20px rgba(0,0,0,0.5)',
-                  objectFit: 'cover'
+                  objectFit: 'contain'
                 }}
                 onError={(e) => {
                   console.error(`Error loading video ${cleanUrl}:`, e);

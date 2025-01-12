@@ -33,20 +33,20 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
   return React.useMemo(() => (
 <div style={{
   position: 'absolute',
-  top: '25%',
+  top: '15%',
   left: '50%',
   transform: 'translateX(-50%)',
   color: 'white',
-  fontSize: 56,
+  fontSize: 72,
   textAlign: 'center',
   backgroundColor: 'rgba(0,0,0,0.7)',
-  padding: '20px',
+  padding: '40px',
   borderRadius: 10,
   fontFamily: 'Georgia, serif',
   lineHeight: 1.2,
   zIndex: 9999,
-  minWidth: '60%',
-  minHeight: '80px',
+  minWidth: '85%',
+  minHeight: '120px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center'
@@ -79,7 +79,8 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
             style={{
               opacity,
               transition: 'opacity 0.2s',
-              position: 'absolute'
+              position: 'absolute',
+              padding: '20px'
             }}
           >
             {token.text}
