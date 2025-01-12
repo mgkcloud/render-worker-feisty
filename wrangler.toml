@@ -1,9 +1,20 @@
 name = "remotion-api"
-type = "javascript"
-account_id = "your-cloudflare-account-id"
-workers_dev = true
-compatibility_date = "2024-01-01"
+type = "esm"
+main = "src/index.js"
+compatibility_date = "2025-01-07"
 compatibility_flags = ["nodejs_compat"]
+external = [
+  "@remotion/compositor-win32-x64-msvc",
+  "@remotion/compositor-darwin-x64", 
+  "@remotion/compositor-darwin-arm64",
+  "@remotion/compositor-linux-arm64-musl",
+  "@remotion/compositor-linux-arm64-gnu",
+  "uglify-js",
+  "@swc/core"
+]
 
 [env.production]
 name = "remotion-api-prod"
+
+[observability.logs]
+enabled = true

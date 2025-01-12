@@ -9,10 +9,24 @@
     "@remotion/media-utils": "4.0.244",
     "@remotion/tailwind": "4.0.244",
     "@remotion/zod-types": "4.0.244",
+    "assert": "^2.0.0",
+    "browserify-zlib": "^0.2.0",
+    "constants-browserify": "^1.0.0",
+    "crypto-browserify": "^3.12.0",
+    "https-browserify": "^1.0.0",
     "itty-router": "^5.0.18",
+    "node-polyfill-webpack-plugin": "^4.1.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "querystring-es3": "^0.2.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "remotion": "4.0.244",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.0",
+    "util": "^0.12.4",
+    "vm-browserify": "^1.1.2",
     "zod": "3.22.3"
   },
   "devDependencies": {
@@ -27,10 +41,11 @@
   },
   "scripts": {
     "dev": "remotion studio",
-    "build": "remotion bundle",
+    "build": "remotion bundle src/remotion-root.js",
     "upgrade": "remotion upgrade",
     "lint": "eslint src --ext ts,tsx,js,jsx && tsc",
-    "create-subtitles": "node sub.mjs"
+    "create-subtitles": "node sub.mjs",
+    "deploy": "remotion deploy"
   },
   "sideEffects": [
     "*.css"

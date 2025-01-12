@@ -1,11 +1,52 @@
 import React from 'react'
-import { AbsoluteFill, useVideoConfig, Img, Audio, Sequence } from 'remotion'
+import { AbsoluteFill, useVideoConfig, Img, Audio, Sequence, getInputProps } from 'remotion'
 import { createTikTokStyleCaptions } from '@remotion/captions'
 import { CaptionPage } from './CaptionPage'
 
+interface Transcript {
+  words: string
+  start: number
+  end: number
+}
+
+interface InputProps {
+  background_url: string
+  image_list: string[]
+  voice_url: string
+  transcripts: Transcript[]
+}
+
 export const TikTokComposition = () => {
   const { width, height, durationInFrames, fps } = useVideoConfig()
-  const { background_url, image_list, voice_url, transcripts } = getInputProps()
+  const validateInputProps = (props: unknown): props is InputProps => {
+    if (typeof props !== 'object' || props === null) return false
+    const p = props as Record<string, unknown>
+    return (
+      typeof p.background_url === 'string' &&
+      Array.isArray(p.image_list) &&
+      p.image_list.every(i => typeof i === 'string') &&
+      typeof p.voice_url === 'string' &&
+      Array.isArray(p.transcripts) &&
+      p.transcripts.every(t => 
+        typeof t === 'object' && t !== null &&
+        typeof t.words === 'string' &&
+        typeof t.start === 'number' &&
+        typeof t.end === 'number'
+      )
+    )
+  }
+
+  const input = getInputProps()
+  if (!validateInputProps(input)) {
+    throw new Error('Invalid input props')
+  }
+
+  const { 
+    background_url, 
+    image_list, 
+    voice_url, 
+    transcripts 
+  } = input
 
   // Convert transcripts to captions format
   const captions = transcripts.map(t => ({
@@ -27,21 +68,28 @@ export const TikTokComposition = () => {
       {/* Background */}
       <Img src={background_url} style={{ width, height }} />
       
-      {/* Images */}
+      {/* Image Slideshow */}
       {image_list.map((img, index) => (
-        <Img
+        <Sequence
           key={index}
-          src={img}
-          style={{
-            position: 'absolute',
-            width: width * 0.8,
-            height: height * 0.4,
-            left: width * 0.1,
-            top: height * (0.1 + (index % 3) * 0.3),
-            borderRadius: 20,
-            boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-          }}
-        />
+          from={index * 90} // 3 seconds per image (90 frames at 30fps)
+          durationInFrames={90}
+        >
+          <Img
+            src={img}
+            style={{
+              position: 'absolute',
+              width: width * 0.8,
+              height: height * 0.6,
+              left: width * 0.1,
+              top: height * 0.2,
+              borderRadius: 20,
+              boxShadow: '0 0 20px rgba(0,0,0,0.5)',
+              opacity: 1,
+              transition: 'opacity 0.5s ease-in-out'
+            }}
+          />
+        </Sequence>
       ))}
 
       {/* Audio */}

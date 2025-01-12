@@ -1,43 +1,58 @@
-import { getRenderProgress } from '@remotion/lambda'
+const statusMap = new Map()
 
-async function handleStatusRequest(request, renderId) {
-  try {
-    const cachedStatus = renderCache.get(renderId)
-    if (!cachedStatus) {
-      return new Response('Render not found', { status: 404 })
-    }
+export const updateStatus = (renderId, status, metadata = {}) => {
+  console.log('Updating render status:', {
+    renderId,
+    status,
+    timestamp: new Date().toISOString(),
+    ...metadata
+  })
 
-    const progress = await getRenderProgress({
-      renderId,
-      bucketName: cachedStatus.bucketName,
-      functionName: 'remotion-render-function',
-      region: 'us-east-1'
-    })
+  statusMap.set(renderId, {
+    status,
+    lastUpdated: Date.now(),
+    ...metadata
+  })
 
-    // Update cache
-    renderCache.set(renderId, {
-      ...cachedStatus,
-      status: progress.done ? 'completed' : 'processing',
-      progress: progress.overallProgress
-    })
-
-    return new Response(JSON.stringify({
-      status: progress.done ? 'completed' : 'processing',
-      progress: progress.overallProgress,
-      outputUrl: progress.outputFile,
-      duration: Date.now() - cachedStatus.startTime
-    }), {
-      headers: { 'Content-Type': 'application/json' }
-    })
-
-  } catch (error) {
-    return new Response(JSON.stringify({
-      error: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
-  }
+  return true
 }
 
-export { handleStatusRequest }
+export const getStatus = (renderId) => {
+  const status = statusMap.get(renderId)
+  console.log('Retrieving status for render:', {
+    renderId,
+    status: status ? status.status : 'not_found',
+    timestamp: new Date().toISOString()
+  })
+
+  return status ? status.status : 'not_found'
+}
+
+export const getStatusDetails = (renderId) => {
+  const status = statusMap.get(renderId)
+  console.log('Retrieving status details for render:', {
+    renderId,
+    status: status ? status.status : 'not_found',
+    timestamp: new Date().toISOString()
+  })
+
+  return status || { status: 'not_found' }
+}
+
+export const cleanupOldStatuses = () => {
+  const now = Date.now()
+  const TTL = 24 * 60 * 60 * 1000 // 24 hours
+  let cleanedCount = 0
+
+  for (const [renderId, status] of statusMap.entries()) {
+    if (now - status.lastUpdated > TTL) {
+      statusMap.delete(renderId)
+      cleanedCount++
+    }
+  }
+
+  console.log('Cleaned up old statuses:', {
+    timestamp: new Date().toISOString(),
+    cleanedCount
+  })
+}

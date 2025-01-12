@@ -1,41 +1,44 @@
-export function validateVideoRequest(input) {
-  const errors = []
+export const validateRequest = (request) => {
+  console.log('Validating request:', {
+    timestamp: new Date().toISOString(),
+    method: request.method,
+    url: request.url,
+    headers: request.headers
+  })
+
+  // Validate required fields
+  const requiredFields = ['videoUrl', 'captions', 'apiKey']
+  const missingFields = requiredFields.filter(field => !request.body[field])
   
-  if (!input.type || input.type !== 'image-video') {
-    errors.push('Invalid type: only image-video is supported')
+  if (missingFields.length > 0) {
+    console.error('Validation failed - missing fields:', missingFields)
+    return {
+      valid: false,
+      errors: [`Missing required fields: ${missingFields.join(', ')}`]
+    }
   }
 
-  if (!input.data) {
-    errors.push('Missing data object')
-    return errors
+  // Validate API key format
+  const apiKeyPattern = /^[a-f0-9]{32}$/
+  if (!apiKeyPattern.test(request.body.apiKey)) {
+    console.error('Validation failed - invalid API key format')
+    return {
+      valid: false,
+      errors: ['Invalid API key format']
+    }
   }
 
-  const { voice_url, background_url, image_list, transcripts } = input.data
-
-  if (!voice_url || typeof voice_url !== 'string') {
-    errors.push('Invalid voice_url')
+  // Validate video URL
+  try {
+    new URL(request.body.videoUrl)
+  } catch (error) {
+    console.error('Validation failed - invalid video URL:', error.message)
+    return {
+      valid: false,
+      errors: ['Invalid video URL format']
+    }
   }
 
-  if (!background_url || typeof background_url !== 'string') {
-    errors.push('Invalid background_url')
-  }
-
-  if (!Array.isArray(image_list) || image_list.length === 0) {
-    errors.push('Invalid image_list')
-  }
-
-  if (!Array.isArray(transcripts) || transcripts.length === 0) {
-    errors.push('Invalid transcripts')
-  } else {
-    transcripts.forEach((t, i) => {
-      if (!t.words || typeof t.words !== 'string') {
-        errors.push(`Transcript ${i} missing words`)
-      }
-      if (typeof t.start !== 'number' || typeof t.end !== 'number') {
-        errors.push(`Transcript ${i} has invalid timestamps`)
-      }
-    })
-  }
-
-  return errors
+  console.log('Request validation successful')
+  return { valid: true }
 }
