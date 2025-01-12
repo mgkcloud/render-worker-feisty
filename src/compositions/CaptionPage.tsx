@@ -33,19 +33,23 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
   return React.useMemo(() => (
 <div style={{
   position: 'absolute',
-  top: '25%', // Position in the top 3/4 of the screen
+  top: '25%',
   left: '50%',
   transform: 'translateX(-50%)',
   color: 'white',
-  fontSize: 48,
+  fontSize: 56,
   textAlign: 'center',
   backgroundColor: 'rgba(0,0,0,0.7)',
   padding: '20px',
   borderRadius: 10,
-  whiteSpace: 'pre', // Preserve whitespace as per Remotion API
-  fontFamily: 'Arial, sans-serif',
+  fontFamily: 'Georgia, serif',
   lineHeight: 1.2,
-  zIndex: 9999 // Ensure it's on the top layer
+  zIndex: 9999,
+  minWidth: '60%',
+  minHeight: '80px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
 }}>
       {page.tokens?.map((token, index) => {
         if (!token?.text || typeof token.fromMs !== 'number' || typeof token.toMs !== 'number') {
@@ -74,7 +78,8 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
             key={index}
             style={{
               opacity,
-              transition: 'opacity 0.2s'
+              transition: 'opacity 0.2s',
+              position: 'absolute'
             }}
           >
             {token.text}

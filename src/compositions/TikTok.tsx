@@ -75,7 +75,7 @@ function TikTokComposition(props: InputProps): React.ReactElement {
           justifyContent: 'center',
           alignItems: 'center',
           color: 'white',
-          fontSize: 24
+          fontSize: 48
         }}>
           No captions available
         </div>
@@ -93,9 +93,10 @@ function TikTokComposition(props: InputProps): React.ReactElement {
       <Audio src={background_url} />
       
       {media_list.map((media: string, index: number) => {
-        const isVideo = isVideoUrl(media)
-        const startFrame = index * 90 // 3 seconds per media (90 frames at 30fps)
-        const duration = 90 // Default duration in frames
+        const cleanUrl = media.split('#')[0];
+        const isVideo = isVideoUrl(cleanUrl);
+        const startFrame = index * 180; // 3 seconds per media (90 frames at 30fps)
+        const duration = 720; // Default duration in frames
 
         return (
           <Sequence
@@ -105,7 +106,7 @@ function TikTokComposition(props: InputProps): React.ReactElement {
           >
             {isVideo ? (
               <Video
-                src={media}
+                src={cleanUrl}
                 style={{
                   position: 'absolute',
                   width: width * 0.8,
@@ -115,6 +116,9 @@ function TikTokComposition(props: InputProps): React.ReactElement {
                   borderRadius: 20,
                   boxShadow: '0 0 20px rgba(0,0,0,0.5)',
                   objectFit: 'cover'
+                }}
+                onError={(e) => {
+                  console.error(`Error loading video ${cleanUrl}:`, e);
                 }}
               />
             ) : (
