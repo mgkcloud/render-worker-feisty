@@ -20,4 +20,8 @@ Config.setBrowserExecutable(null); // Use default Chrome for better codec suppor
 Config.setChromiumIgnoreCertificateErrors(true); // Handle HTTPS issues with media files
 
 // Performance settings
-Config.setDelayRenderTimeoutInMilliseconds(30000); // 30s timeout for loading resources
+Config.setDelayRenderTimeoutInMilliseconds(60000); // 60s timeout for loading resources and slower playback
+
+// OffthreadVideo optimization settings
+Config.setConcurrency(4); // Optimize frame extraction concurrency
+Config.setOffthreadVideoCacheSizeInBytes(1024 * 1024 * 1024); // 1GB cache for frame extraction

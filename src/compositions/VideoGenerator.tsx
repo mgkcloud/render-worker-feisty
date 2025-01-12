@@ -56,7 +56,7 @@ export const VideoGenerator: React.FC = () => {
   const calculateDuration = (transcripts: z.infer<typeof InputPropsSchema>['transcripts'], mediaCount: number) => {
     const transcriptDuration = transcripts.reduce((max, t) => 
       Math.max(max, t.end * 1000), 0);
-    const mediaDuration = mediaCount * 3000; // 3 seconds per media item
+    const mediaDuration = mediaCount * 6000; // 6 seconds per media item
     return Math.max(transcriptDuration, mediaDuration);
   };
 

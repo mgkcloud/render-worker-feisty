@@ -1,5 +1,5 @@
 import React from 'react'
-import { AbsoluteFill, useVideoConfig, Img, Audio, Sequence, Video } from 'remotion'
+import { AbsoluteFill, useVideoConfig, Img, Audio, Sequence, OffthreadVideo, Loop } from 'remotion'
 import type { CompositionProps } from 'remotion'
 import { createTikTokStyleCaptions } from '@remotion/captions'
 import { CaptionPage } from './CaptionPage'
@@ -95,8 +95,8 @@ function TikTokComposition(props: InputProps): React.ReactElement {
       {media_list.map((media: string, index: number) => {
         const cleanUrl = media.split('#')[0];
         const isVideo = isVideoUrl(cleanUrl);
-        const startFrame = index * 180; // 3 seconds per media (90 frames at 30fps)
-        const duration = 720; // Default duration in frames
+        const startFrame = index * 180; // 6 seconds per media (360 frames at 60fps)
+        const duration = 720; // 6 second duration in frames
 
         return (
           <Sequence
@@ -105,9 +105,11 @@ function TikTokComposition(props: InputProps): React.ReactElement {
             durationInFrames={duration}
           >
             {isVideo ? (
-              <Video
-                src={cleanUrl}
-                style={{
+              <Loop durationInFrames={duration}>
+                <OffthreadVideo
+                  src={cleanUrl}
+                  muted={true}
+                  style={{
                   position: 'absolute',
                   width: width * 0.8,
                   height: height * 0.6,
@@ -120,7 +122,9 @@ function TikTokComposition(props: InputProps): React.ReactElement {
                 onError={(e) => {
                   console.error(`Error loading video ${cleanUrl}:`, e);
                 }}
-              />
+                  delayRenderTimeoutInMilliseconds={5000} // Increase timeout for slower playback
+                />
+              </Loop>
             ) : (
               <Img
                 src={media}
