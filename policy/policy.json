@@ -13,33 +13,35 @@
     {
       "Effect": "Allow",
       "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:ListBucket",
-        "s3:DeleteObject"
+        "s3:GetObject"
       ],
       "Resource": [
-        "arn:aws:s3:::remotion-renders",
-        "arn:aws:s3:::remotion-renders/*"
+        "arn:aws:s3:::YOUR_DEPLOYMENT_BUCKET_NAME",
+        "arn:aws:s3:::YOUR_DEPLOYMENT_BUCKET_NAME/*"
       ]
     },
     {
       "Effect": "Allow",
       "Action": [
-        "lambda:InvokeFunction",
-        "lambda:CreateFunction",
-        "lambda:UpdateFunctionCode",
-        "lambda:UpdateFunctionConfiguration",
-        "lambda:GetFunction",
-        "lambda:DeleteFunction"
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_RENDER_OUTPUT_BUCKET_NAME",
+        "arn:aws:s3:::YOUR_RENDER_OUTPUT_BUCKET_NAME/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
       ],
       "Resource": "*"
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iam:PassRole"
-      ],
+      "Action": "iam:PassRole",
       "Resource": "arn:aws:iam::*:role/remotion-lambda-role"
     }
   ]

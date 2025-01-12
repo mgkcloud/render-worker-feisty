@@ -34,11 +34,18 @@ export async function handleVideoGeneration(request) {
     }
 
     // Invoke Lambda
-    console.log('Invoking Lambda function...')
-    const lambdaResponse = await invokeLambda(input)
-    console.log('Lambda invocation complete.');
-    const { renderId, bucketName } = lambdaResponse
-    console.log('Lambda response:', { renderId, bucketName })
+    console.log('Invoking Remotion Lambda function...')
+    const lambdaResponse = await invokeLambda({
+      region: process.env.REMOTION_AWS_REGION,
+      functionName: process.env.REMOTION_AWS_LAMBDA_FUNCTION,
+      siteName: input.siteName, // Assuming siteName is passed in the request
+      compositionId: input.compositionId, // Assuming compositionId is passed in the request
+      inputProps: input.inputProps, // Assuming inputProps are passed in the request
+      codec: input.codec // Assuming codec is passed in the request
+    });
+    console.log('Remotion Lambda invocation complete.');
+    const { renderId, bucketName } = lambdaResponse;
+    console.log('Remotion Lambda response:', { renderId, bucketName });
 
     // Store render info
     console.log('Storing render info in cache...')

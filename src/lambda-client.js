@@ -1,30 +1,24 @@
+import { renderMediaOnLambda } from '@remotion/lambda/client';
+
 export const invokeLambda = async (body) => {
-  console.log('Invoking Lambda function...')
+  console.log('Invoking Remotion Lambda function...');
+
+  const { region, functionName, siteName, compositionId, inputProps, codec } = body;
 
   try {
-    console.log('Lambda request body:', JSON.stringify(body, null, 2))
-
-    console.log('Sending request to Lambda endpoint:', process.env.LAMBDA_INVOKE_URL)
-    const response = await fetch(process.env.LAMBDA_INVOKE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.LAMBDA_API_KEY
-      },
-      body: JSON.stringify(body)
+    const response = await renderMediaOnLambda({
+      region: region || process.env.REMOTION_AWS_REGION,
+      functionName: functionName || process.env.REMOTION_AWS_LAMBDA_FUNCTION,
+      siteName: siteName,
+      compositionId: compositionId,
+      inputProps: inputProps,
+      codec: codec,
     });
 
-    if (!response.ok) {
-      console.error('Lambda invocation failed:', response.statusText)
-      throw new Error(`Lambda invocation failed: ${response.statusText}`);
-    }
-
-    const responseData = await response.json()
-    console.log('Lambda response:', JSON.stringify(responseData, null, 2))
-    return responseData
-    
+    console.log('Remotion Lambda response:', response);
+    return response;
   } catch (error) {
-    console.error('Lambda invocation error:', error)
-    throw error
+    console.error('Remotion Lambda invocation error:', error);
+    throw error;
   }
 };
