@@ -39,17 +39,23 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
   color: 'white',
   fontSize: 72,
   textAlign: 'center',
-  backgroundColor: 'rgba(0,0,0,0.7)',
+  background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(60,60,60,0.25) 80%)',
   padding: '40px',
-  borderRadius: 10,
-  fontFamily: 'Georgia, serif',
-  lineHeight: 1.2,
+  borderRadius: 15,
+  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontWeight: 600,
+  letterSpacing: '-0.02em',
+  lineHeight: 1.3,
   zIndex: 9999,
   minWidth: '85%',
   minHeight: '120px',
   display: 'flex',
   justifyContent: 'center',
-  alignItems: 'center'
+  alignItems: 'center',
+  boxShadow: '0 4px 30px rgba(0,0,0,0.05)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
+  border: '1px solid rgba(255,255,255,0.1)'
 }}>
       {page.tokens?.map((token, index) => {
         if (!token?.text || typeof token.fromMs !== 'number' || typeof token.toMs !== 'number') {
@@ -77,10 +83,12 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
           <span
             key={index}
             style={{
-              opacity,
-              transition: 'opacity 0.2s',
-              position: 'absolute',
-              padding: '20px'
+            opacity,
+            transition: 'opacity 0.2s',
+            position: 'absolute',
+            padding: '20px',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            WebkitTextStroke: '1px rgba(0,0,0,0.3)'
             }}
           >
             {token.text}

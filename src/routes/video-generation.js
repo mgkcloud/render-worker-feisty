@@ -26,7 +26,15 @@ export async function handleVideoGeneration(request) {
         success: false,
         message: "Invalid request data",
         errors: validationResult.errors
-      }), { status: 400 });
+      }), { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
 
     // Check quota
@@ -36,7 +44,15 @@ export async function handleVideoGeneration(request) {
       return new Response(JSON.stringify({
         success: false,
         message: "Monthly API quota exceeded"
-      }), { status: 429 });
+      }), { 
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
 
     // Generate video using local renderer
@@ -68,7 +84,12 @@ export async function handleVideoGeneration(request) {
     console.log('Video generation started successfully');
     return new Response(JSON.stringify(response), { 
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
     });
 
   } catch (error) {
@@ -78,6 +99,18 @@ export async function handleVideoGeneration(request) {
       message: error.message || "Internal server error"
     }), { status: 500 });
   }
+}
+
+// Handle CORS preflight requests
+export async function handleOptions(request) {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    }
+  });
 }
 
 export async function handleProgressCheck(request) {
@@ -92,7 +125,15 @@ export async function handleProgressCheck(request) {
       return new Response(JSON.stringify({
         success: false,
         message: "Render not found"
-      }), { status: 404 });
+      }), { 
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
 
     if (render.apiKey !== apiKey) {
@@ -100,7 +141,15 @@ export async function handleProgressCheck(request) {
       return new Response(JSON.stringify({
         success: false,
         message: "Unauthorized"
-      }), { status: 403 });
+      }), { 
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
 
     console.log('Checking render progress...');
@@ -115,14 +164,27 @@ export async function handleProgressCheck(request) {
     console.log('Returning progress response:', progress);
     return new Response(JSON.stringify(progress), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
     });
 
   } catch (error) {
     console.error('Progress check error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      message: error.message || "Internal server error"
-    }), { status: 500 });
+      return new Response(JSON.stringify({
+        success: false,
+        message: error.message || "Internal server error"
+      }), { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
   }
 }

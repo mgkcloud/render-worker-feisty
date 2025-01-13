@@ -5,14 +5,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const videoService = {
   async generateVideo(videoProps: any): Promise<VideoGenerationResponse> {
+    console.log('Generating video with props:', videoProps);
     try {
       const request: Omit<VideoGenerationRequest, 'siteName'> = {
         compositionId: 'TikTok',
         inputProps: videoProps,
         codec: 'h264'
       };
+      console.log('Sending render request:', request);
 
-      const response = await fetch(`${API_BASE_URL}/api/video-generation?api_key=${API_KEY}`, {
+      const response = await fetch(`${API_BASE_URL}/api/render?api_key=${API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,6 +23,7 @@ export const videoService = {
       });
 
       const data = await response.json();
+      console.log('Render response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to generate video');
@@ -38,8 +41,9 @@ export const videoService = {
 
   async checkProgress(renderId: string): Promise<ProgressResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/video-generation/progress/${renderId}?api_key=${API_KEY}`);
+      const response = await fetch(`${API_BASE_URL}/api/render/progress/${renderId}?api_key=${API_KEY}`);
       const data = await response.json();
+      console.log('Progress response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to check progress');

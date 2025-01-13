@@ -1,0 +1,17 @@
+[Unit]
+Description=Render Worker Service
+After=network.target
+
+[Service]
+Type=forking
+User=mgk
+WorkingDirectory=/home/mgk/code/render-worker
+ExecStart=/home/mgk/code/render-worker/scripts/services.sh start
+ExecStop=/home/mgk/code/render-worker/scripts/services.sh stop
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/mgk/code/render-worker/logs/service.log
+StandardError=append:/home/mgk/code/render-worker/logs/service-error.log
+
+[Install]
+WantedBy=multi-user.target

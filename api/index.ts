@@ -26,7 +26,7 @@ export class RemotionVideoAPI {
       this.lambdaClient = new RemotionLambdaClient(config.lambda);
     } else {
       this.localRenderer = new RemotionLocalRenderer({
-        serveUrl: config.serveUrl || 'http://localhost:3000',
+        serveUrl: config.serveUrl || 'http://localhost:3001',
         outputDir: config.outputDir
       });
     }

@@ -1,29 +1,32 @@
-const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+import { enablePreview } from '@remotion/bundler';
+import { webpackOverride } from './remotion.config.js';
 
+enablePreview();
 
-module.exports = {
-  resolve: {
-    fallback: {
-      assert: require.resolve('assert'),
-      crypto: require.resolve('crypto-browserify'),
-      fs: false, // or provide a polyfill if needed
-      http: require.resolve('stream-http'),
-      https: require.resolve('https-browserify'),
-      os: require.resolve('os-browserify/browser'),
-      path: require.resolve('path-browserify'),
-      stream: require.resolve('stream-browserify'),
-      url: require.resolve('url'),
-      util: require.resolve('util'),
-      zlib: require.resolve('browserify-zlib')
-    }
+const config = {
+  ...webpackOverride,
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true,
+        },
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+    ],
   },
-  plugins: [
-    new webpack.ProvidePlugin({
-      process: 'process/browser',
-      Buffer: ['buffer', 'Buffer']
-    }),
-    new NodePolyfillPlugin()
-
-  ]
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
 };
+
+export default config;

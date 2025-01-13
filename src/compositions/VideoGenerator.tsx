@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Player } from '@remotion/player';
 import { TikTokComposition, InputPropsSchema } from './TikTok';
+
+export { InputPropsSchema };
 import { z } from 'zod';
 
 const VideoDataSchema = z.object({
