@@ -147,43 +147,29 @@ async function processJob(job, outputPath) {
     }));
 
     // Build render command
-    const command = [
-      'npx remotion render',
-      'src/remotion-root.ts',  // Entry point
-      'TikTok',                // Composition ID
-      outputPath,              // Output path
-      '--props="$(cat ' + propsPath + ')"',
-      '--codec=h264',
-      '--concurrency=1',
-      '--log=verbose'
-    ].join(' ');
+const lambdaClient = new RemotionLambdaClient({
+  region: 'us-east-1',
+  functionName: 'remotion-lambda-function',
+});
 
-    console.log('Executing render command:', command);
+const renderResponse = await lambdaClient.renderVideo({
+  compositionId: 'TikTok',
+  inputProps: {
+    background_url: job.data.background_url,
+    media_list: job.data.media_list,
+    voice_url: job.data.voice_url,
+    transcripts: job.data.transcripts,
+  },
+  codec: 'h264',
+});
 
-    // Execute render command
-    const { stdout, stderr } = await execAsync(command);
-    console.log('Render stdout:', stdout);
-    if (stderr) console.error('Render stderr:', stderr);
-
-    // Clean up props file
-    fs.unlinkSync(propsPath);
-
-    // Verify output file exists
-    if (!fs.existsSync(outputPath)) {
-      throw new Error('Render completed but output file not found');
-    }
-
-    // Update job with success
-    const fileSize = fs.statSync(outputPath).size;
     job.status = 'completed';
     job.output = {
-      video_url: `/videos/${job.id}.mp4`,
-      file_size: fileSize
+      video_url: renderResponse.outputFile,
     };
     job.updated_at = new Date().toISOString();
 
     console.log(`Job ${job.id} completed successfully`);
-
   } catch (error) {
     console.error(`Job ${job.id} failed:`, error);
     job.status = 'failed';

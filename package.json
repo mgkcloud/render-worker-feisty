@@ -12,6 +12,7 @@
     "@remotion/player": "4.0.248",
     "@remotion/zod-types": "4.0.248",
     "assert": "^2.0.0",
+    "axios": "^1.7.9",
     "browserify-zlib": "^0.2.0",
     "constants-browserify": "^1.0.0",
     "cors": "^2.8.5",
@@ -70,7 +71,8 @@
     "api": "PORT=3001 node src/server.js",
     "prestart": "mkdir -p rendered-videos",
     "start": "concurrently -n \"studio,api,frontend\" \"npm run remotion:studio\" \"npm run api\" \"npm run dev\"",
-    "clean": "rm -rf rendered-videos/*"
+    "clean": "rm -rf rendered-videos/*",
+    "test-webhook": "node scripts/test-webhook.js"
   },
   "sideEffects": [
     "*.css"
