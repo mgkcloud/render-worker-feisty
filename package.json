@@ -58,7 +58,7 @@
     "vite": "^6.0.7"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "check": "node scripts/check-setup.js",
@@ -70,7 +70,7 @@
     "remotion:preview": "remotion preview src/remotion-root.ts",
     "api": "PORT=3001 node src/server.js",
     "prestart": "mkdir -p rendered-videos",
-    "start": "concurrently -n \"studio,api,frontend\" \"npm run remotion:studio\" \"npm run api\" \"npm run dev\"",
+    "start": "pm2 start ecosystem.config.cjs",
     "clean": "rm -rf rendered-videos/*",
     "test-webhook": "node scripts/test-webhook.js"
   },

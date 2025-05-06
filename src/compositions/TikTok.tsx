@@ -33,7 +33,7 @@ const isVideoUrl = (url: string): boolean => {
 export const calculateMetadata: CalculateMetadataFunction<InputProps> = async ({
   props,
 }) => {
-  const fps = 30;
+  const fps = 60;
   console.log('Calculating metadata for props:', props);
 
   try {
@@ -84,6 +84,11 @@ export const calculateMetadata: CalculateMetadataFunction<InputProps> = async ({
 function TikTokComposition(props: InputProps): React.ReactElement {
   const { background_url, media_list, voice_url, transcripts } = props;
   const { width, height, fps, durationInFrames } = useVideoConfig()
+
+  // Volume controls
+  const [videoVolume, setVideoVolume] = React.useState(0.04); // Default video volume
+  const [voiceVolume, setVoiceVolume] = React.useState(1); // Default voie-over volume
+  const [backgroundVolume, setBackgroundVolume] = React.useState(0.1); // Default background music volume
 
   React.useEffect(() => {
     console.log('TikTokComposition Initializing with:', {
@@ -155,6 +160,8 @@ function TikTokComposition(props: InputProps): React.ReactElement {
     );
   }
 
+  const overlapDurationInFrames = 40; 
+
   return React.useMemo(() => (
     <AbsoluteFill>
       {/* Background gradient */}
@@ -194,27 +201,38 @@ function TikTokComposition(props: InputProps): React.ReactElement {
       }} />
       
       {/* Background music */}
-      <Audio src={background_url} volume={0.2} />
+      <Audio src={background_url} volume={backgroundVolume} />
       
       {/* Media sequence */}
       <Series>
         {media_list.map((media: string, index: number) => {
           const cleanUrl = media.split('#')[0];
           const isVideo = isVideoUrl(cleanUrl);
-          const duration = 180; // 6 seconds per media
+          const duration = 140; // 6 seconds per media
 
           return (
             <Series.Sequence
               key={index}
               durationInFrames={duration}
-              premountFor={4 * fps} // Premount 4 seconds before
+              offset={index > 0 ? -overlapDurationInFrames : 0} // Overlap with previous
             >
               {isVideo ? (
                 <Loop durationInFrames={duration}>
                   <OffthreadVideo
                     src={cleanUrl}
-                    muted={true}
                     pauseWhenBuffering={true}
+                    volume={(frame) => {
+                      // Calculate fade in/25t volume
+                      const baseVolume = videoVolume;
+                      if (frame < overlapDurationInFrames) {
+                        // Fade in
+                        return (frame / overlapDurationInFrames) * baseVolume;
+                      } else if (frame > duration - overlapDurationInFrames) {
+                        // Fade out
+                        return ((duration - frame) / overlapDurationInFrames) * baseVolume;
+                      }
+                      return baseVolume; // Full volume
+                    }}
                     style={{
                       position: 'absolute',
                       width: width * 1,
@@ -257,7 +275,7 @@ function TikTokComposition(props: InputProps): React.ReactElement {
       </Series>
 
       {/* Voice narration */}
-      <Audio src={voice_url} volume={3} />
+      <Audio src={voice_url} volume={voiceVolume} />
 
       {/* Captions */}
       <Series>
@@ -276,7 +294,7 @@ function TikTokComposition(props: InputProps): React.ReactElement {
         </Series.Sequence>
       </Series>
     </AbsoluteFill>
-  ), [background_url, media_list, voice_url, transcripts, width, height, fps, durationInFrames, pages])
+  ), [background_url, media_list, voice_url, transcripts, width, height, fps, durationInFrames, pages, videoVolume, voiceVolume, backgroundVolume])
 }
 
 // Exports

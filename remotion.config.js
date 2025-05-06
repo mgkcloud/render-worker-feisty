@@ -11,7 +11,7 @@ Config.setOverwriteOutput(true);
 export const webpackOverride = (currentConfig) => {
   return enableTailwind({
     ...currentConfig,
-    entry: './src/remotion-root.ts',
+    entry: './src/index.tsx',
     resolve: {
       ...currentConfig.resolve,
       extensions: ['.ts', '.tsx', '.js', '.jsx'],

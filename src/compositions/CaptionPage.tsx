@@ -33,7 +33,7 @@ export const CaptionPage: React.FC<CaptionPageProps> = React.memo(({ page }) => 
   return React.useMemo(() => (
 <div style={{
   position: 'absolute',
-  top: '15%',
+  top: '45%',
   left: '50%',
   transform: 'translateX(-50%)',
   color: 'white',

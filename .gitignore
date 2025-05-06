@@ -3,3 +3,5 @@ node_modules
 
 
 build
+logs/service-error.log
+logs/service-error.log
